@@ -20,8 +20,8 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * Author: Konstantin Dolgyi
- * Email: kd@trinitydigital.ru
+ * Author: Andrey Khitryy
+ * Email: andrey.khitryy@gmail.com
  */
 public class CameraActivity extends AppCompatActivity {
 
