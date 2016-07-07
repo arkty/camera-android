@@ -1,3 +1,5 @@
+package com.github.arkty.androidcamera;
+
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,8 +13,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import com.github.arkty.androidcamera.BuildConfig;
-
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -25,7 +25,7 @@ import java.util.Locale;
  */
 public class CameraActivity extends AppCompatActivity {
 
-    private static final String TAG = "CameraActivity";
+    private static final String TAG = "com.github.arkty.androidcamera.CameraActivity";
 
     private static final String EXTRA_REQUIRED_SIZE_PX = "requiredSizePx";
     private static final String EXTRA_SAVE_IN_GALLERY = "saveInGallery";

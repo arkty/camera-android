@@ -2,6 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.github.arkty.androidcamera">
     <application>
-        <activity android:name="CameraActivity"/>
+        <activity android:name=".CameraActivity"/>
     </application>
 </manifest>
