@@ -160,7 +160,7 @@ public class CameraActivity extends AppCompatActivity {
     private void returnResult() {
        // TODO Resize picture
         Intent i = new Intent();
-        i.putExtra(EXTRA_PHOTO_FILE_PATH, outputFile.getAbsoluteFile());
+        i.putExtra(EXTRA_PHOTO_FILE_PATH, outputFile.getAbsolutePath());
         setResult(RESULT_OK, i);
         finish();
     }
