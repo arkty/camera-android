@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 /**
  * Author: Andrey Khitryy
@@ -25,7 +24,7 @@ public class GalleryActivity extends AppCompatActivity {
     public static final int RESULT_ERROR = 1;
 
     public static void startForResult(AppCompatActivity context, int requestCode, int requiredSizeBytes, int requiredSizePx) {
-        Intent i = new Intent(context, GalleryActivity.class);
+        Intent i = new Intent(context, com.github.arkty.androidcamera.GalleryActivity.class);
         i.putExtra(EXTRA_REQUIRED_SIZE_PX, requiredSizePx);
         i.putExtra(EXTRA_REQUIRED_SIZE_BYTES, requiredSizeBytes);
         context.startActivityForResult(i, requestCode);
@@ -90,6 +89,7 @@ public class GalleryActivity extends AppCompatActivity {
                 else {
                     setResult(RESULT_ERROR);
                 }
+                finish();
             }
         }, requiredSizePx, requiredSizeBytes).start();
 

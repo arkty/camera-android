@@ -42,7 +42,7 @@ public class CameraActivity extends AppCompatActivity {
     public static final int RESULT_ERROR = 3;
 
     public static void startForResult(AppCompatActivity context, int requestCode, int requiredSizeBytes, int requiredSizePx, boolean saveInGallery, String outputFilename) {
-        Intent i = new Intent(context, CameraActivity.class);
+        Intent i = new Intent(context, com.github.arkty.androidcamera.CameraActivity.class);
         i.putExtra(EXTRA_REQUIRED_SIZE_BYTES, requiredSizeBytes);
         i.putExtra(EXTRA_REQUIRED_SIZE_PX, requiredSizePx);
         i.putExtra(EXTRA_SAVE_IN_GALLERY, saveInGallery);
@@ -84,8 +84,6 @@ public class CameraActivity extends AppCompatActivity {
             try {
                 outputFile = createTempFile();
             } catch (IOException e) {
-                if(BuildConfig.DEBUG)
-                    e.printStackTrace();
                 setResult(RESULT_ERROR);
                 finish();
             }
@@ -175,6 +173,7 @@ public class CameraActivity extends AppCompatActivity {
                 else {
                     setResult(RESULT_ERROR);
                 }
+                finish();
             }
         }, requiredSizePx, requiredSizeBytes).start();
     }

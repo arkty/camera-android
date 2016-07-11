@@ -71,7 +71,7 @@ public class ImagePickHelper {
                     GalleryActivity.startForResult(activity, REQUEST_GALLERY, requiredSizeBytes, requiredSizePx);
                 }
                 else {
-                    CameraActivity.startForResult(activity, REQUEST_CAMERA, requiredSizeBytes, requiredSizePx, saveToGallery, outputFilename);
+                    com.github.arkty.androidcamera.CameraActivity.startForResult(activity, REQUEST_CAMERA, requiredSizeBytes, requiredSizePx, saveToGallery, outputFilename);
                 }
             }
         }).create().show();
@@ -79,16 +79,16 @@ public class ImagePickHelper {
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == REQUEST_CAMERA) {
-            if(resultCode == CameraActivity.RESULT_OK) {
-                String filename = data.getExtras().getString(CameraActivity.EXTRA_PHOTO_FILE_PATH);
+            if(resultCode == com.github.arkty.androidcamera.CameraActivity.RESULT_OK) {
+                String filename = data.getExtras().getString(com.github.arkty.androidcamera.CameraActivity.EXTRA_PHOTO_FILE_PATH);
                 listener.onImagePicked(filename);
             }
-            else if(resultCode == CameraActivity.RESULT_CAMERA_PERMISSION_DENIED ||
-                    resultCode == CameraActivity.RESULT_STORAGE_PERMISSION_DENIED) {
+            else if(resultCode == com.github.arkty.androidcamera.CameraActivity.RESULT_CAMERA_PERMISSION_DENIED ||
+                    resultCode == com.github.arkty.androidcamera.CameraActivity.RESULT_STORAGE_PERMISSION_DENIED) {
                 new AlertDialog.Builder(activity).setMessage(needMorePermissionsMessage).create().show();
                 listener.onPickCancelled(REASON_PERMISSIONS);
             }
-            else if(resultCode == CameraActivity.RESULT_CANCELED) {
+            else if(resultCode == com.github.arkty.androidcamera.CameraActivity.RESULT_CANCELED) {
                 listener.onPickCancelled(REASON_CANCELLED);
             }
             else {
