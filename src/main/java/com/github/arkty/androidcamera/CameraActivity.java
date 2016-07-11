@@ -1,6 +1,8 @@
 package com.github.arkty.androidcamera;
 
 import android.Manifest;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -25,9 +27,11 @@ import java.util.Locale;
  */
 public class CameraActivity extends AppCompatActivity {
 
-    private static final String TAG = "com.github.arkty.androidcamera.CameraActivity";
+    private static final String TAG = "CameraActivity";
 
     private static final String EXTRA_REQUIRED_SIZE_PX = "requiredSizePx";
+    private static final String EXTRA_REQUIRED_SIZE_BYTES = "requiredSizeBytes";
+
     private static final String EXTRA_SAVE_IN_GALLERY = "saveInGallery";
     private static final String EXTRA_OUTPUT_FILENAME = "outputFilename";
 
@@ -35,19 +39,11 @@ public class CameraActivity extends AppCompatActivity {
 
     public static final int RESULT_CAMERA_PERMISSION_DENIED = 1;
     public static final int RESULT_STORAGE_PERMISSION_DENIED = 2;
-    public static final int RESULT_IO_EXCEPTION = 3;
-    public static final int RESULT_CAMERA_CANCELLED = 4;
+    public static final int RESULT_ERROR = 3;
 
-    public static void startForResult(AppCompatActivity context, int requestCode) {
-        startForResult(context, requestCode, 0, false, null);
-    }
-
-    public static void startForResult(AppCompatActivity context, int requestCode, int requiredSizePx) {
-        startForResult(context, requestCode, requiredSizePx, false, null);
-    }
-
-    private static void startForResult(AppCompatActivity context, int requestCode, int requiredSizePx, boolean saveInGallery, String outputFilename) {
+    public static void startForResult(AppCompatActivity context, int requestCode, int requiredSizeBytes, int requiredSizePx, boolean saveInGallery, String outputFilename) {
         Intent i = new Intent(context, CameraActivity.class);
+        i.putExtra(EXTRA_REQUIRED_SIZE_BYTES, requiredSizeBytes);
         i.putExtra(EXTRA_REQUIRED_SIZE_PX, requiredSizePx);
         i.putExtra(EXTRA_SAVE_IN_GALLERY, saveInGallery);
         i.putExtra(EXTRA_OUTPUT_FILENAME, outputFilename);
@@ -60,7 +56,9 @@ public class CameraActivity extends AppCompatActivity {
     private final int REQUEST_CAMERA_PERMISSION = 1;
     private final int REQUEST_FILEREAD_PERMISSION = 2;
 
+    private int requiredSizeBytes;
     private int requiredSizePx;
+
     private boolean saveInGallery;
     private String outputFilename;
 
@@ -72,6 +70,7 @@ public class CameraActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         Intent i = getIntent();
+        requiredSizeBytes = i.getIntExtra(EXTRA_REQUIRED_SIZE_BYTES, 0);
         requiredSizePx = i.getIntExtra(EXTRA_REQUIRED_SIZE_PX, 0);
         saveInGallery = i.getBooleanExtra(EXTRA_SAVE_IN_GALLERY, false);
         outputFilename = i.getStringExtra(EXTRA_OUTPUT_FILENAME);
@@ -87,7 +86,7 @@ public class CameraActivity extends AppCompatActivity {
             } catch (IOException e) {
                 if(BuildConfig.DEBUG)
                     e.printStackTrace();
-                setResult(RESULT_IO_EXCEPTION);
+                setResult(RESULT_ERROR);
                 finish();
             }
         }
@@ -104,7 +103,7 @@ public class CameraActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == REQUEST_CAMERA){
-            if(resultCode == AppCompatActivity.RESULT_OK){
+            if(resultCode == AppCompatActivity.RESULT_OK) {
                 if (data != null) {
                     if(isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
                         returnResult();
@@ -117,7 +116,7 @@ public class CameraActivity extends AppCompatActivity {
                 }
             }
             else {
-                setResult(RESULT_CAMERA_CANCELLED);
+                setResult(RESULT_CANCELED);
                 finish();
             }
         }
@@ -158,11 +157,26 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void returnResult() {
-       // TODO Resize picture
-        Intent i = new Intent();
-        i.putExtra(EXTRA_PHOTO_FILE_PATH, outputFile.getAbsolutePath());
-        setResult(RESULT_OK, i);
-        finish();
+        final Dialog progress = new ProgressDialog.Builder(this)
+                .setMessage("Пожалуйста подождите..")
+                .setCancelable(false)
+                .create();
+        progress.show();
+
+        new ImageProcessor(this, outputFile.getAbsolutePath(), new ImageProcessor.Callback() {
+            @Override
+            public void onImageProcessed(String filename) {
+                progress.dismiss();
+                Intent i = new Intent();
+                if(filename != null) {
+                    i.putExtra(EXTRA_PHOTO_FILE_PATH, filename);
+                    setResult(RESULT_OK, i);
+                }
+                else {
+                    setResult(RESULT_ERROR);
+                }
+            }
+        }, requiredSizePx, requiredSizeBytes).start();
     }
 
     private boolean isPermissionGranted(String permission) {
@@ -176,7 +190,6 @@ public class CameraActivity extends AppCompatActivity {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             requestPermissions(new String[]{permission}, code);
     }
-
 
     private File createTempFile() throws IOException {
         File tempFile = File.createTempFile("photo", ".jpg", getCacheDir());
