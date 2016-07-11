@@ -106,9 +106,9 @@ public class ImageProcessor extends Thread {
             compressed.close();
             bitmap.recycle();
         } catch (FileNotFoundException e) {
-
+            e.printStackTrace();
         } catch (IOException e) {
-
+            e.printStackTrace();
         }
 
         final String resultFilename = resultFile != null ? resultFile.getAbsolutePath() : filename;
@@ -128,6 +128,8 @@ public class ImageProcessor extends Thread {
             public void run() {
                 if(callback.get() != null)
                     callback.get().onImageProcessed(filename);
+                else
+                    Log.wtf(TAG, "Where is callback?");
             }
         });
     }

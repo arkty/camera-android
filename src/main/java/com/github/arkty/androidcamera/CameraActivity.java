@@ -25,7 +25,7 @@ import java.util.Locale;
  * Author: Andrey Khitryy
  * Email: andrey.khitryy@gmail.com
  */
-public class CameraActivity extends AppCompatActivity {
+public class CameraActivity extends AppCompatActivity implements ImageProcessor.Callback{
 
     private static final String TAG = "CameraActivity";
 
@@ -64,6 +64,7 @@ public class CameraActivity extends AppCompatActivity {
 
     private Uri outputFileUri;
     private File outputFile;
+    private Dialog progress;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -89,6 +90,10 @@ public class CameraActivity extends AppCompatActivity {
             }
         }
 
+        progress = new ProgressDialog.Builder(this)
+                .setMessage("Пожалуйста подождите..")
+                .setCancelable(false)
+                .create();
 
         if(isPermissionGranted(Manifest.permission.CAMERA)) {
             takePhoto();
@@ -155,27 +160,8 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void returnResult() {
-        final Dialog progress = new ProgressDialog.Builder(this)
-                .setMessage("Пожалуйста подождите..")
-                .setCancelable(false)
-                .create();
         progress.show();
-
-        new ImageProcessor(this, outputFile.getAbsolutePath(), new ImageProcessor.Callback() {
-            @Override
-            public void onImageProcessed(String filename) {
-                progress.dismiss();
-                Intent i = new Intent();
-                if(filename != null) {
-                    i.putExtra(EXTRA_PHOTO_FILE_PATH, filename);
-                    setResult(RESULT_OK, i);
-                }
-                else {
-                    setResult(RESULT_ERROR);
-                }
-                finish();
-            }
-        }, requiredSizePx, requiredSizeBytes).start();
+        new ImageProcessor(this, outputFile.getAbsolutePath(), this, requiredSizePx, requiredSizeBytes).start();
     }
 
     private boolean isPermissionGranted(String permission) {
@@ -199,5 +185,19 @@ public class CameraActivity extends AppCompatActivity {
     private String generateFilename() {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         return "JPEG_" + timeStamp + "_.jpg";
+    }
+
+    @Override
+    public void onImageProcessed(String filename) {
+        progress.dismiss();
+        Intent i = new Intent();
+        if(filename != null) {
+            i.putExtra(EXTRA_PHOTO_FILE_PATH, filename);
+            setResult(RESULT_OK, i);
+        }
+        else {
+            setResult(RESULT_ERROR);
+        }
+        finish();
     }
 }

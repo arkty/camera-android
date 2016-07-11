@@ -6,13 +6,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 /**
  * Author: Andrey Khitryy
  * Email: andrey.khitryy@gmail.com
  */
 
-public class GalleryActivity extends AppCompatActivity {
+public class GalleryActivity extends AppCompatActivity implements ImageProcessor.Callback{
 
     private static final String TAG = "GalleryActivity";
 
@@ -34,6 +35,7 @@ public class GalleryActivity extends AppCompatActivity {
     private int requiredSizeBytes;
 
     private UriResolver uriResolver;
+    private Dialog progress;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,6 +45,11 @@ public class GalleryActivity extends AppCompatActivity {
         requiredSizeBytes = i.getIntExtra(EXTRA_REQUIRED_SIZE_BYTES, 0);
 
         uriResolver = new UriResolver(this);
+
+        progress = new ProgressDialog.Builder(this)
+                .setMessage("Пожалуйста подождите..")
+                .setCancelable(false)
+                .create();
 
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType("image/*");
@@ -72,27 +79,22 @@ public class GalleryActivity extends AppCompatActivity {
     }
 
     private void returnResult(String filepath) {
-        final Dialog progress = new ProgressDialog.Builder(this)
-                .setMessage("Пожалуйста подождите..")
-                .setCancelable(false)
-                .create();
         progress.show();
-        new ImageProcessor(this, filepath, new ImageProcessor.Callback() {
-            @Override
-            public void onImageProcessed(String filename) {
-                progress.dismiss();
-                Intent i = new Intent();
-                if(filename != null) {
-                    i.putExtra(EXTRA_PHOTO_FILE_PATH, filename);
-                    setResult(RESULT_OK, i);
-                }
-                else {
-                    setResult(RESULT_ERROR);
-                }
-                finish();
-            }
-        }, requiredSizePx, requiredSizeBytes).start();
+        new ImageProcessor(this, filepath, this, requiredSizePx, requiredSizeBytes).start();
+    }
 
-
+    @Override
+    public void onImageProcessed(String filename) {
+        if(progress != null && progress.isShowing())
+            progress.dismiss();
+        Intent i = new Intent();
+        if(filename != null) {
+            i.putExtra(EXTRA_PHOTO_FILE_PATH, filename);
+            setResult(RESULT_OK, i);
+        }
+        else {
+            setResult(RESULT_ERROR);
+        }
+        finish();
     }
 }
