@@ -62,8 +62,8 @@ public class GalleryActivity extends AppCompatActivity {
                 }
                 else {
                     setResult(RESULT_ERROR);
+                    finish();
                 }
-                finish();
             }
             else {
                 setResult(RESULT_CANCELED);
