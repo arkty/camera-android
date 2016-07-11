@@ -3,5 +3,6 @@
       package="com.github.arkty.androidcamera">
     <application>
         <activity android:name=".CameraActivity"/>
+        <activity android:name=".GalleryActivity"/>
     </application>
 </manifest>
